@@ -65,20 +65,29 @@ import Onward
 struct Interactor {
     static var newToDoItem: Action<ToDoStore, String, String> {
         Action { title, description in
-            Reducer(get: \ .todos, set: \ .todos) { todos in
-                todos + [ToDo(title: title, description: description)]
+            Middleware { store in
+                print("Sleeping...")
+                try? await Task.sleep(for: .seconds(3))
+                print("Awake!")
+
+                return "Middleware's context"
+            } before: { context in
+                Reducer(get: \.todos, set: \.todos) { todos in
+                    todos + [ToDo(title: "\(title) \(context)", description: description)]
+                }
             }
         }
     }
 
     static var toggleToDoStatus: Action<ToDo> {
         Action {
-            Reducer(get: \ .isCompleted, set: \ .isCompleted) { isCompleted in
+            Reducer(get: \.isCompleted, set: \.isCompleted) { isCompleted in
                 !isCompleted
             }
         }
     }
 }
+
 ```
 
 ### 3. Dispatch Actions in Your UI
@@ -105,7 +114,9 @@ struct ContentView: View {
                         Text(todo.description).font(.caption)
                     }
                     .onTapGesture {
-                        Interactor.toggleToDoStatus.dispatch(todo)
+                        Task {
+                            await Interactor.toggleToDoStatus(todo)
+                        }
                     }
                 }
             }
@@ -113,7 +124,9 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add") {
                         let todoIndex = store.todos.count + 1
-                        Interactor.newToDoItem.dispatch(store, "Title \(todoIndex)", "Description \(todoIndex)")
+                        Task {
+                            await Interactor.newToDoItem(store, args: "Title \(todoIndex)", "Description \(todoIndex)")
+                        }
                     }
                 }
             }
