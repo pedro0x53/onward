@@ -6,45 +6,47 @@
 //
 
 public struct Reducer<Store> {
-    private var _reduce: (Store) -> Void
+    private var _reduce: (Store) async -> Void
 
-    public init (_ work: @escaping (Store) -> Void) {
+    public init (_ work: @escaping () async -> Void) {
+        self._reduce = { _ in
+            await work()
+        }
+    }
+
+    public init (_ work: @escaping (Store) async -> Void) {
         self._reduce = work
     }
 
     public init<each Input>(getter keyPaths: repeat KeyPath<Store, each Input>,
-                            do work: @escaping (repeat each Input) -> Void) {
+                            do work: @escaping (repeat each Input) async -> Void) {
         self._reduce = { store in
-            work(repeat store[keyPath: each keyPaths])
+            await work(repeat store[keyPath: each keyPaths])
         }
     }
 
     public init<each Output>(setter keyPaths: repeat ReferenceWritableKeyPath<Store, each Output>,
-                                       do work: @escaping () -> (repeat each Output)) {
+                             do work: @escaping () async -> (repeat each Output)) {
         self._reduce = { store in
-            repeat store[keyPath: each keyPaths] = each work()
+            repeat store[keyPath: each keyPaths] = each await work()
         }
     }
 
-    public init<each Input, each Output>(
-        get getKeyPaths: repeat KeyPath<Store, each Input>,
-        set setKeyPaths: repeat ReferenceWritableKeyPath<Store, each Output>,
-        do work: @escaping (repeat each Input) -> (repeat each Output)) {
-            let localGetKeyPaths = (repeat each getKeyPaths)
-            let localSetKeyPaths = (repeat each setKeyPaths)
-
+    public init<each Input, each Output>(get getKeyPaths: repeat KeyPath<Store, each Input>,
+                                         set setKeyPaths: repeat ReferenceWritableKeyPath<Store, each Output>,
+                                         do work: @escaping (repeat each Input) async -> (repeat each Output)) {
         self._reduce = { store in
-            repeat store[keyPath: each localSetKeyPaths] = each work(repeat store[keyPath: each localGetKeyPaths])
+            repeat store[keyPath: each setKeyPaths] = each await work(repeat store[keyPath: each getKeyPaths])
         }
     }
 
-    public func reduce(_ store: Store) {
-        self._reduce(store)
+    public func reduce(_ store: Store) async {
+        await self._reduce(store)
     }
 }
 
 extension Reducer: ActionComponentScheme {
-    public func run(_ store: Store) {
-        self.reduce(store)
+    public func run(_ store: Store) async {
+        await self.reduce(store)
     }
 }

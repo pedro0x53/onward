@@ -16,9 +16,9 @@ public struct ReducerQueue<Store> {
         self.reducers = content()
     }
 
-    public func reduce(_ store: Store) {
+    public func reduce(_ store: Store) async {
         for reducer in reducers {
-            reducer.reduce(store)
+            await reducer.reduce(store)
         }
     }
 
@@ -28,7 +28,7 @@ public struct ReducerQueue<Store> {
 }
 
 extension ReducerQueue: ActionComponentScheme {
-    public func run(_ store: Store) {
-        self.reduce(store)
+    public func run(_ store: Store) async {
+        await self.reduce(store)
     }
 }

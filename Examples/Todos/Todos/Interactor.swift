@@ -10,8 +10,16 @@ import Onward
 struct Interactor {
     static var newToDoItem: Action<ToDoStore, String, String> {
         Action { title, description in
-            Reducer(get: \.todos, set: \.todos) { todos in
-                todos + [ToDo(title: title, description: description)]
+            Middleware { store in
+                print("Sleeping...")
+                try? await Task.sleep(for: .seconds(3))
+                print("Awake!")
+
+                return "Middleware's context"
+            } before: { context in
+                Reducer(get: \.todos, set: \.todos) { todos in
+                    todos + [ToDo(title: "\(title) \(context)", description: description)]
+                }
             }
         }
     }

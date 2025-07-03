@@ -28,7 +28,9 @@ struct ContentView: View {
                             .font(.caption)
                     }
                     .onTapGesture {
-                        Interactor.toggleToDoStatus.dispatch(todo)
+                        Task {
+                            await Interactor.toggleToDoStatus.dispatch(todo)
+                        }
                     }
                 }
             }
@@ -36,9 +38,11 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add") {
                         let todoIndex = store.todos.count + 1
-                        Interactor.newToDoItem.dispatch(store,
-                                                        "Title \(todoIndex)",
-                                                        "Desctiption \(todoIndex)")
+                        Task {
+                            await Interactor.newToDoItem(store,
+                                args: "Title \(todoIndex)", "Description \(todoIndex)"
+                            )
+                        }
                     }
                 }
             }
