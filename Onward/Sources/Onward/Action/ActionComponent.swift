@@ -6,18 +6,19 @@
 //
 
 public protocol ActionComponentScheme {
-    associatedtype Store: SSoT
-    func run(_ store: Store) async
+    associatedtype Store
+
+    func run(_ store: Store)
 }
 
-public struct ActionComponent<Store: SSoT>: ActionComponentScheme {
-    private let _run: (Store) async -> Void
+public struct ActionComponent<Store>: ActionComponentScheme {
+    private let _run: (Store) -> Void
 
     public init<C: ActionComponentScheme>(_ component: C) where C.Store == Store {
         self._run = component.run
     }
 
-    public func run(_ store: Store) async {
-        await _run(store)
+    public func run(_ store: Store) {
+        _run(store)
     }
 }

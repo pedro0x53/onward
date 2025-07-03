@@ -6,7 +6,7 @@
 //
 
 @resultBuilder
-public enum ReducerBuilder<Store: SSoT> {
+public enum ReducerBuilder<Store> {
     public static func buildBlock(_ reducers: [Reducer<Store>]...) -> [Reducer<Store>] {
         reducers.flatMap { $0 }
     }

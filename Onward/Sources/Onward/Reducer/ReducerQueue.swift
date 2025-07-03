@@ -5,7 +5,7 @@
 //  Created by Pedro Sousa on 02/07/25.
 //
 
-public struct ReducerQueue<Store: SSoT> {
+public struct ReducerQueue<Store> {
     private(set) var reducers: [Reducer<Store>]
 
     public init (_ reducers: [Reducer<Store>]) {
@@ -16,9 +16,9 @@ public struct ReducerQueue<Store: SSoT> {
         self.reducers = content()
     }
 
-    public func reduce(_ store: Store) async {
+    public func reduce(_ store: Store) {
         for reducer in reducers {
-            await reducer.reduce(store)
+            reducer.reduce(store)
         }
     }
 
@@ -28,7 +28,7 @@ public struct ReducerQueue<Store: SSoT> {
 }
 
 extension ReducerQueue: ActionComponentScheme {
-    public func run(_ store: Store) async {
-        await self.reduce(store)
+    public func run(_ store: Store) {
+        self.reduce(store)
     }
 }

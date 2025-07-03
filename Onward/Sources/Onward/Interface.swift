@@ -6,6 +6,6 @@
 //
 
 protocol Interface {
-    associatedtype Store: SSoT
+    associatedtype Store
     var store: Store { get }
 }
