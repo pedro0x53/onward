@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Examples/Todos/Todos.xcodeproj">
+      location = "group:">
    </FileRef>
    <FileRef
-      location = "group:Onward">
+      location = "group:Examples/Todos/Todos.xcodeproj">
    </FileRef>
 </Workspace>

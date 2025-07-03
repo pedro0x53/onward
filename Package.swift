@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Onward",
+    name: "onward",
     platforms: [
         .iOS(.v17),
         .macOS(.v14),
