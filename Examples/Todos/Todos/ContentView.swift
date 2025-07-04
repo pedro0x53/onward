@@ -7,9 +7,13 @@
 
 import SwiftUI
 struct ContentView: View {
-    @State private var store: ToDoStore
+    @State private var store: ToDoStore = {
+        let store = ToDoStore()
+        store.todos.append(ToDo(title: "First", description: "First description"))
+        return store
+    }()
 
-    init(store: ToDoStore = .init()) {
+    init() {
         self.store = store
     }
 
@@ -27,11 +31,9 @@ struct ContentView: View {
                         Text(todo.description)
                             .font(.caption)
                     }
-                    .onTapGesture {
-                        Task {
-                            await Interactor.toggleToDoStatus.dispatch(todo)
-                        }
-                    }
+                }
+                .onTapGesture {
+                    Interactor.toggleToDoStatus(todo)
                 }
             }
             .toolbar {
@@ -46,10 +48,11 @@ struct ContentView: View {
                     }
                 }
             }
+            .navigationTitle(store.title)
         }
     }
 }
 
 #Preview {
-    ContentView(store: .init())
+    ContentView()
 }

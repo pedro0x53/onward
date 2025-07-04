@@ -6,8 +6,10 @@
 //
 
 import Observation
+import Foundation
 
 @Observable
 class ToDoStore {
+    var title: String = UUID().uuidString
     var todos: [ToDo] = []
 }

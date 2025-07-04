@@ -6,28 +6,43 @@
 //
 
 import Onward
+import Foundation
 
 struct Interactor {
-    static var newToDoItem: Action<ToDoStore, String, String> {
-        Action { title, description in
-            Middleware { store in
+    static var newToDoItem: AsyncAction<ToDoStore, String, String> {
+        AsyncAction { title, description in
+            AsyncMiddleware { store in
+                Interactor.updateTitle(store) // dispatching an Action
+
                 print("Sleeping...")
                 try? await Task.sleep(for: .seconds(3))
                 print("Awake!")
 
                 return "Middleware's context"
-            } before: { context in
-                Reducer(get: \.todos, set: \.todos) { todos in
-                    todos + [ToDo(title: "\(title) \(context)", description: description)]
+            } interceptBefore: { context in
+                AsyncReducer(get: \.todos, set: \.todos) { todos in
+                    todos + [ToDo(title: "\(title) - \(context)", description: description)]
                 }
+            }
+
+            AsyncReducer(get: \.todos, set: \.todos) { todos in
+                todos + [ToDo(title: "Copy of \(title)", description: description)]
             }
         }
     }
 
     static var toggleToDoStatus: Action<ToDo> {
         Action {
-            Reducer(get: \.isCompleted, set: \.isCompleted) { isCompleted in
-                !isCompleted
+            Reducer(get: \.isCompleted, set: \.isCompleted) { status in
+                return !status
+            }
+        }
+    }
+
+    static var updateTitle: Action<ToDoStore> {
+        Action {
+            Reducer(setter: \.title) {
+                return UUID().uuidString
             }
         }
     }
