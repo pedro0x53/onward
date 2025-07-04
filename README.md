@@ -36,9 +36,11 @@ And add `Onward` as a dependency for your target:
 
 ```swift
 import Observation
+import Foundation
 
 @Observable
 class ToDoStore {
+    var title: String = UUID().uuidString
     var todos: [ToDo] = []
 }
 
@@ -63,26 +65,24 @@ class ToDo: Identifiable {
 import Onward
 
 struct Interactor {
-    static var newToDoItem: Action<ToDoStore, String, String> {
-        Action { title, description in
-            Middleware { store in
+        static var newToDoItem: AsyncAction<ToDoStore, String, String> {
+        AsyncAction { title, description in
+            AsyncMiddleware { store in
+                Interactor.updateTitle(store) // dispatching an Action
+
                 print("Sleeping...")
                 try? await Task.sleep(for: .seconds(3))
                 print("Awake!")
 
                 return "Middleware's context"
-            } before: { context in
-                Reducer(get: \.todos, set: \.todos) { todos in
-                    todos + [ToDo(title: "\(title) \(context)", description: description)]
+            } interceptBefore: { context in
+                AsyncReducer(get: \.todos, set: \.todos) { todos in
+                    todos + [ToDo(title: "\(title) - \(context)", description: description)]
                 }
             }
-        }
-    }
 
-    static var toggleToDoStatus: Action<ToDo> {
-        Action {
-            Reducer(get: \.isCompleted, set: \.isCompleted) { isCompleted in
-                !isCompleted
+            AsyncReducer(get: \.todos, set: \.todos) { todos in
+                todos + [ToDo(title: "Copy of \(title)", description: description)]
             }
         }
     }
@@ -93,44 +93,12 @@ struct Interactor {
 ### 3. Dispatch Actions in Your UI
 
 ```swift
-import SwiftUI
+@State private var store: ToDoStore = ...
 
-struct ContentView: View {
-    @State private var store: ToDoStore
-
-    init(store: ToDoStore = .init()) {
-        self.store = store
-    }
-
-    var body: some View {
-        NavigationStack {
-            List(store.todos) { todo in
-                HStack {
-                    Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                    VStack(alignment: .leading) {
-                        Text(todo.title).font(.headline)
-                        Text(todo.description).font(.caption)
-                    }
-                    .onTapGesture {
-                        Task {
-                            await Interactor.toggleToDoStatus(todo)
-                        }
-                    }
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add") {
-                        let todoIndex = store.todos.count + 1
-                        Task {
-                            await Interactor.newToDoItem(store, args: "Title \(todoIndex)", "Description \(todoIndex)")
-                        }
-                    }
-                }
-            }
-        }
+Button("Add") {
+    let todoIndex = store.todos.count + 1
+    Task {
+        await Interactor.newToDoItem(store, args: "Title \(todoIndex)", "Description \(todoIndex)")
     }
 }
 ```
