@@ -65,7 +65,15 @@ class ToDo: Identifiable {
 import Onward
 
 struct Interactor {
-        static var newToDoItem: AsyncAction<ToDoStore, String, String> {
+    static var updateTitle: Action<ToDoStore> {
+        Action {
+            Reducer(setter: \.title) {
+                return UUID().uuidString
+            }
+        }
+    }
+    
+    static var newToDoItem: AsyncAction<ToDoStore, String, String> {
         AsyncAction { title, description in
             AsyncMiddleware { store in
                 Interactor.updateTitle(store) // dispatching an Action
