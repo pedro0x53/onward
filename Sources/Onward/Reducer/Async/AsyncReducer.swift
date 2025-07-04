@@ -1,11 +1,11 @@
 //
-//  Reducer.swift
-//  Onward
+//  AsyncReducer.swift
+//  onward
 //
 //  Created by Pedro Sousa on 28/06/25.
 //
 
-public struct Reducer<Store> {
+public struct AsyncReducer<Store> {
     private var _reduce: (Store) async -> Void
 
     public init (_ work: @escaping () async -> Void) {
@@ -45,7 +45,7 @@ public struct Reducer<Store> {
     }
 }
 
-extension Reducer: ActionComponentScheme {
+extension AsyncReducer: AsyncActionComponentScheme {
     public func run(_ store: Store) async {
         await self.reduce(store)
     }

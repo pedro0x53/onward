@@ -1,9 +1,10 @@
 //
 //  ReducerBuilder.swift
-//  redux
+//  onward
 //
-//  Created by Pedro Sousa on 29/06/25.
+//  Created by Pedro Sousa on 04/07/25.
 //
+
 
 @resultBuilder
 public enum ReducerBuilder<Store> {

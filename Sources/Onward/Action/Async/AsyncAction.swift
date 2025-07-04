@@ -1,14 +1,14 @@
 //
-//  Action.swift
-//  Onward
+//  AsyncAction.swift
+//  onward
 //
 //  Created by Pedro Sousa on 28/06/25.
 //
 
-public struct Action<Store, each Argument>: Sendable {
-    private let components: @Sendable (repeat each Argument) -> [ActionComponent<Store>]
+public struct AsyncAction<Store, each Argument>: Sendable {
+    private let components: @Sendable (repeat each Argument) -> [AsyncActionComponent<Store>]
 
-    public init(@ActionBuilder<Store> _ components: @Sendable @escaping (repeat each Argument) -> [ActionComponent<Store>]) {
+    public init(@AsyncActionBuilder<Store> _ components: @Sendable @escaping (repeat each Argument) -> [AsyncActionComponent<Store>]) {
         self.components = components
     }
 

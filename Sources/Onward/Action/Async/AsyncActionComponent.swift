@@ -1,20 +1,20 @@
 //
-//  ActionComponent.swift
-//  redux
+//  AsyncActionComponent.swift
+//  onward
 //
 //  Created by Pedro Sousa on 02/07/25.
 //
 
-public protocol ActionComponentScheme {
+public protocol AsyncActionComponentScheme {
     associatedtype Store
 
     func run(_ store: Store) async
 }
 
-public struct ActionComponent<Store>: ActionComponentScheme {
+public struct AsyncActionComponent<Store>: AsyncActionComponentScheme {
     private let _run: (Store) async -> Void
 
-    public init<C: ActionComponentScheme>(_ component: C) where C.Store == Store {
+    public init<C: AsyncActionComponentScheme>(_ component: C) where C.Store == Store {
         self._run = component.run
     }
 
