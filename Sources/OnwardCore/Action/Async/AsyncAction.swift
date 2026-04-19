@@ -13,14 +13,14 @@ public struct AsyncAction<S: Store, each Argument>: Sendable {
     }
 
     public func dispatch(_ store: S,
-                         args arguments: repeat each Argument) async {
+                         _ arguments: repeat each Argument) async {
         for component in components(repeat each arguments) {
             await component.run(store)
         }
     }
 
     public func callAsFunction(_ store: S,
-                               args arguments: repeat each Argument) async {
-        await dispatch(store, args: repeat each arguments)
+                               _ arguments: repeat each Argument) async {
+        await dispatch(store, repeat each arguments)
     }
 }

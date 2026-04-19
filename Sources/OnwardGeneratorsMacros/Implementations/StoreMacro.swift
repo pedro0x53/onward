@@ -53,24 +53,32 @@ public struct StoreMacro: ExtensionMacro {
             
             DeclSyntax(
             """
-                public func dispatch<each Argument>(_ action: Action<\(raw: storeName),
-                                                    repeat each Argument>, args: repeat each Argument) {
-                    store.dispatch(action, args: repeat each args)
+                public func dispatch<each Argument>(
+                    _ action: Action<\(raw: storeName), repeat each Argument>,
+                    _ args: repeat each Argument
+                ) {
+                    store.dispatch(action, repeat each args)
                 }
             
-                public func dispatch<each Argument>(_ actionPath: KeyPath<\(raw: storeName), Action<\(raw: storeName), repeat each Argument>>,
-                                                    args: repeat each Argument) {
-                    store.dispatch(actionPath, args: repeat each args)
+                public func dispatch<each Argument>(
+                    _ actionPath: KeyPath<\(raw: storeName), Action<\(raw: storeName), repeat each Argument>>,
+                    _ args: repeat each Argument
+                ) {
+                    store.dispatch(actionPath, repeat each args)
                 }
             
-                public func dispatch<each Argument>(_ asyncAction: AsyncAction<\(raw: storeName), repeat each Argument>,
-                                                    args: repeat each Argument) async {
-                    await store.dispatch(asyncAction, args: repeat each args)
+                public func dispatch<each Argument>(
+                    _ asyncAction: AsyncAction<\(raw: storeName), repeat each Argument>,
+                    _ args: repeat each Argument
+                ) async {
+                    await store.dispatch(asyncAction, repeat each args)
                 }
             
-                public func dispatch<each Argument>(_ asyncActionPath: KeyPath<\(raw: storeName), AsyncAction<\(raw: storeName), repeat each Argument>>,
-                                                    args: repeat each Argument) async {
-                    await store.dispatch(asyncActionPath, args: repeat each args)
+                public func dispatch<each Argument>(
+                    _ asyncActionPath: KeyPath<\(raw: storeName), AsyncAction<\(raw: storeName), repeat each Argument>>,
+                    _ args: repeat each Argument
+                ) async {
+                    await store.dispatch(asyncActionPath, repeat each args)
                 }
             """)
         }

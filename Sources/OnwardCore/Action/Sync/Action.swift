@@ -13,14 +13,14 @@ public struct Action<S: Store, each Argument>: Sendable {
     }
 
     public func dispatch(_ store: S,
-                         args arguments: repeat each Argument) {
+                         _ arguments: repeat each Argument) {
         for component in components(repeat each arguments) {
             component.run(store)
         }
     }
 
     public func callAsFunction(_ store: S,
-                               args arguments: repeat each Argument) {
-        dispatch(store, args: repeat each arguments)
+                               _ arguments: repeat each Argument) {
+        dispatch(store, repeat each arguments)
     }
 }
