@@ -1,15 +1,16 @@
 # Onward
 
-Onward is a composable, action-based state management library for Swift, inspired by Redux and designed to leverage Swift's type system and result builders. It enables you to build scalable, testable, and maintainable applications by structuring your state changes as actions and reducers.
+Onward is a composable, action-based state management library for Swift, inspired by Redux and built around Swift's type system, result builders, and macros. It structures state changes as actions and reducers, separating business logic from state through an explicit Interactor layer.
 
 ## Features
 
-- **Composable Actions**: Define actions that encapsulate state changes.
-- **Reducers**: Pure functions that describe how state is transformed.
-- **Reducer Queues**: Compose multiple reducers to handle complex state updates.
-- **Middleware**: Intercept and enhance actions for side effects or logging.
-- **Swift Result Builders**: Use result builders to compose actions and reducers in a declarative way.
-- **Type Safety**: Leverages Swift generics and key paths for safe state manipulation.
+- **`@Store` macro**: Declares a state container and auto-generates a `Proxy` snapshot type and mutator actions for every stored property.
+- **`@Interactor` macro**: Owns all business logic (actions, reducers, middleware) for a store, keeping it independently testable.
+- **Composable Actions**: Inline declarative style or macro-based (`@Action`, `@Reducer`, `@Middleware`) — both first-class.
+- **Middleware**: Intercept actions for side effects; read state via an immutable `Proxy` snapshot.
+- **Async support**: `AsyncAction` and `AsyncMiddleware` with `await`-based dispatch.
+- **Dependency injection**: `@Inward` declares dependencies on `OnwardContainer`; `@Outward` resolves them — no singletons, fully testable.
+- **Key-path dispatch**: Dispatch actions via `store.dispatch(\.actionName)` for clean, refactor-safe call sites.
 
 ## Installation
 
@@ -19,7 +20,7 @@ Add Onward to your `Package.swift`:
 .package(url: "https://github.com/pedro0x53/onward.git", from: "0.1.0")
 ```
 
-And add `Onward` as a dependency for your target:
+Then add `Onward` as a dependency for your target:
 
 ```swift
 .target(
@@ -32,89 +33,141 @@ And add `Onward` as a dependency for your target:
 
 ## Usage
 
-### 1. Define Your Store
+### 1. Define a Store
+
+Use `@Store(Interactor.self)` paired with `@Observable`. The macro generates a `Proxy` snapshot type and a mutator action for each stored `var`.
 
 ```swift
 import Observation
-import Foundation
+import Onward
 
 @Observable
-class ToDoStore {
-    var title: String = UUID().uuidString
+@Store(ToDoInteractor.self)
+final class ToDoStore {
     var todos: [ToDo] = []
-}
-
-@Observable
-class ToDo: Identifiable {
-    let id = UUID()
-    var title: String
-    var description: String
-    var isCompleted: Bool
-
-    init(title: String, description: String, isCompleted: Bool = false) {
-        self.title = title
-        self.description = description
-        self.isCompleted = isCompleted
-    }
+    var isAlertPresented: Bool = false
 }
 ```
 
-### 2. Define Actions and Reducers
+### 2. Define an Interactor
+
+The `@Interactor` macro generates the required `build()` factory and `init()`. Declare your actions as computed properties — either inline (declarative) or with the `@Action`, `@Reducer`, and `@Middleware` macros.
 
 ```swift
 import Onward
 
-struct Interactor {
-    static var updateTitle: Action<ToDoStore> {
-        Action {
-            Reducer(setter: \.title) {
-                return UUID().uuidString
+@Interactor
+final class ToDoInteractor {
+
+    // Inline declarative style
+    var addItem: Action<ToDoStore, String, String> {
+        Action { title, description in
+            Middleware { proxy in
+                let newToDo = ToDo(title: title, description: description)
+                var todos = proxy.todos
+                todos.append(newToDo)
+                proxy.dispatch(\.todosMutator, todos)
             }
         }
     }
-    
-    static var newToDoItem: AsyncAction<ToDoStore, String, String> {
-        AsyncAction { title, description in
-            AsyncMiddleware { store in
-                Interactor.updateTitle(store) // dispatching an Action
 
-                print("Sleeping...")
-                try? await Task.sleep(for: .seconds(3))
-                print("Awake!")
-
-                return "Middleware's context"
-            } interceptBefore: { context in
-                AsyncReducer(get: \.todos, set: \.todos) { todos in
-                    todos + [ToDo(title: "\(title) - \(context)", description: description)]
-                }
+    var loadRemote: AsyncAction<ToDoStore> {
+        AsyncAction {
+            AsyncMiddleware { proxy in
+                let items = await self.apiClient.fetchItems()
+                proxy.dispatch(\.todosMutator, items)
             }
-
-            AsyncReducer(get: \.todos, set: \.todos) { todos in
-                todos + [ToDo(title: "Copy of \(title)", description: description)]
-            }
+            AsyncReducer(setter: \.isAlertPresented) { true }
         }
     }
+
+    // Macro style — composes named reducers and middleware by key path
+    @Action(middlewares: \Self.fetchMiddleware, lateReducers: \Self.showAlertReducer)
+    var loadRemoteAction: AsyncAction<ToDoStore>
+
+    @Middleware(ToDoStore.self)
+    private func fetch(_ proxy: ToDoStore.Proxy) async {
+        let items = await apiClient.fetchItems()
+        proxy.dispatch(\.todosMutator, items)
+    }
+
+    @Reducer(ToDoStore.self, set: \.isAlertPresented)
+    func showAlert() async -> Bool { true }
 }
-
 ```
 
-### 3. Dispatch Actions in Your UI
+### 3. Register and Resolve Dependencies
+
+Declare dependencies with `@Inward` on an `OnwardContainer` extension. Resolve them anywhere with `@Outward`.
 
 ```swift
-@State private var store: ToDoStore = ...
+// Declaration (e.g. in Workers/APIClient.swift)
+extension OnwardContainer {
+    @Inward var apiClient: APIClient = DefaultAPIClient()
+}
 
-Button("Add") {
-    let todoIndex = store.todos.count + 1
-    Task {
-        await Interactor.newToDoItem(store, args: "Title \(todoIndex)", "Description \(todoIndex)")
+// Resolution inside an Interactor
+@Interactor
+final class ToDoInteractor {
+    @Outward(\.apiClient) var apiClient: APIClient
+    // ...
+}
+```
+
+Override for tests by writing to `OnwardContainer.shared`:
+
+```swift
+OnwardContainer.shared.apiClient = MockAPIClient()
+```
+
+### 4. Dispatch Actions from the UI
+
+Use key-path dispatch — no need to hold a direct reference to the action value.
+
+```swift
+struct ContentView: View {
+    @State private var store: ToDoStore = .init()
+
+    var body: some View {
+        List(store.todos) { todo in
+            Text(todo.title)
+                .onTapGesture {
+                    // Dispatch on a nested store
+                    todo.dispatch(\.toggleCompleted)
+                }
+        }
+        .toolbar {
+            Button("Add") {
+                store.dispatch(\.addItem, "New Task", "Description")
+            }
+        }
+        .task {
+            await store.dispatch(\.loadRemote)
+        }
     }
 }
 ```
+
+## Architecture Overview
+
+```
+View  ──dispatch──▶  Store  ──interactor──▶  Interactor
+                      │                         │
+                   (state)               Actions / Reducers / Middleware
+                      │                         │
+                   Proxy ◀────────────────── (read-only snapshot)
+```
+
+- **Store** holds observable state. The `@Store` macro wires it to its interactor and generates mutator actions.
+- **Interactor** owns all business logic. It never holds state; it only reads via `Proxy` and writes via dispatch.
+- **Middleware** runs side effects before reducers apply. It receives an immutable `Proxy` snapshot.
+- **Reducer** is a pure function that derives a new value from the current one.
+- **OnwardContainer** is the dependency graph — declared with `@Inward`, consumed with `@Outward`.
 
 ## Example
 
-See the full example in [`Examples/Todos`](Examples/Todos) for a working SwiftUI app using Onward.
+See the full working SwiftUI app in [`Examples/Todos`](Examples/Todos).
 
 ## License
 
-MIT 
+MIT
