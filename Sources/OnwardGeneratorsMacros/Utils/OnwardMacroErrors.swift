@@ -1,16 +1,10 @@
-//
-//  OnwardMacroErrors.swift
-//  onward
-//
-//  Created by Pedro Sousa on 12/11/25.
-//
-
 import SwiftDiagnostics
 
 enum OnwardMacroError: String, DiagnosticMessage {
     case notAClass
     case notAFunction
     case notAVariable
+    case notNamedDecl
 
     case missingStore
     case missingActionComponents
@@ -24,6 +18,9 @@ enum OnwardMacroError: String, DiagnosticMessage {
     case getterCountMismatch
     case setterCountMismatch
 
+    case missingInwardType
+    case missingInwardDefault
+
     var identifier: String { self.rawValue }
     var diagnosticID: MessageID { MessageID(domain: "OnwardMacro", id: self.identifier) }
     var severity: DiagnosticSeverity { .error }
@@ -36,6 +33,8 @@ enum OnwardMacroError: String, DiagnosticMessage {
             return "@Reducer can only be applied to functions"
         case .notAVariable:
             return "@Action can only be applied to variables"
+        case .notNamedDecl:
+            return "Macro can only be applied to top-level named declarations"
         case .missingStore:
             return "Macro requires T.Type conform to Store protocol"
         case .missingActionComponents:
@@ -54,6 +53,10 @@ enum OnwardMacroError: String, DiagnosticMessage {
             return "Number of parameters should be equal to the number of Reducer get/getter parameter"
         case .setterCountMismatch:
             return "Number of returning types should be equal to the number of Reducer set/setter parameter"
+        case .missingInwardType:
+            return "@Inward requires an explicit type annotation, e.g. `@Inward var apiClient: APIClient = ...`"
+        case .missingInwardDefault:
+            return "@Inward requires an initializer expression to use as the InwardKey defaultValue, e.g. `@Inward var apiClient: APIClient = DefaultAPIClient()`"
         }
     }
 }

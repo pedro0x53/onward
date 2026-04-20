@@ -1,15 +1,6 @@
-//
-//  ContentView.swift
-//  Todos
-//
-//  Created by Pedro Sousa on 03/07/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.colorScheme) var colorScheme
-
     @State private var store: ToDoStore = .init()
 
     var body: some View {
@@ -28,31 +19,25 @@ struct ContentView: View {
                     }
                 }
                 .onTapGesture {
-                    withAnimation {
-//                        todo.dispatch(Actions.toggleToDoStatus)
-                    }
+                    todo.dispatch(\.toggleToDoStatusAction)
                 }
             }
             .toolbar {
                 Button("Add") {
-//                    store.dispatch(Actions.newToDoItem,
-//                                   args: "New Item", UUID().uuidString)
-                }
-
-                Button {
-//                    Task { await store.dispatch(Actions.fakeAPICall) }
-                } label: {
-                    Image(systemName: "network")
+                    store.dispatch(\.addNewToDoItem, "New Item", "New Description")
                 }
             }
-            .alert(store.alert.title, isPresented: $store.alertIsPresented) {
+            .alert(store.alert.title, isPresented: $store.isAlertPresented) {
                 Button("Ok") {
-//                    store.dispatch(Actions.dismissAlert)
+                    store.dispatch(\.dismissAlertDeclAction)
                 }
             } message: {
                 Text(store.alert.message)
             }
-            .navigationTitle(store.title)
+            .navigationTitle("ToDos")
+        }
+        .task {
+            await store.dispatch(\.loadRemoteAction)
         }
     }
 }

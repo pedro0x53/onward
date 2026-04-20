@@ -1,11 +1,38 @@
-//
-//  ActionMacro.swift
-//  onward
-//
-//  Created by Pedro Sousa on 23/12/25.
-//
-
 import OnwardCore
+
+/// Composes an ``Action`` or ``AsyncAction`` from named reducers and
+/// middlewares referenced by key path.
+///
+/// Apply `@Action` to a stored property whose type is `Action<S>` or
+/// `AsyncAction<S>`. The macro generates an accessor that builds the action
+/// from the referenced components. Components run in the order:
+/// **reducers → middlewares → lateReducers**.
+///
+/// The macro resolves to a synchronous ``Action`` or an asynchronous
+/// ``AsyncAction`` depending on whether the referenced components are
+/// sync (``Reducer``, ``Middleware``) or async (``AsyncReducer``,
+/// ``AsyncMiddleware``). All components in a single `@Action` must share
+/// the same sync/async context.
+///
+/// ```swift
+/// // Synchronous action
+/// @Action(reducers: \Self.incrementReducer,
+///         middlewares: \Self.logMiddleware)
+/// var incrementAction: Action<CounterStore>
+///
+/// // Asynchronous action
+/// @Action(reducers: \Self.dismissReducer,
+///         middlewares: \Self.apiMiddleware)
+/// var refreshAction: AsyncAction<ToDoStore>
+///
+/// // Shorthand for reducers only
+/// @Action(\Self.toggleReducer)
+/// var toggleAction: Action<ToDo>
+///
+/// // Shorthand for middlewares only
+/// @Action(\Self.analyticsMiddleware)
+/// var trackAction: Action<ToDoStore>
+/// ```
 
 // MARK: Action
 

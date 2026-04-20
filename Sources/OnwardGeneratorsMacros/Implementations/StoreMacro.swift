@@ -1,16 +1,44 @@
-//
-//  StoreMacroImplementation.swift
-//  onward
-//
-//  Created by Pedro Sousa on 11/11/25.
-//
-
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import SwiftDiagnostics
 
-public struct StoreMacro: ExtensionMacro {
+public struct StoreMacro: ExtensionMacro, MemberMacro {
+    public static func expansion(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        guard case .argumentList(let arguments) = node.arguments,
+              let interactorType = extractInteractorType(from: arguments)
+        else {
+            return []
+        }
+
+        return [
+            DeclSyntax(stringLiteral:
+            """
+                let interactor: \(interactorType) = \(interactorType).build()
+            """)
+        ]
+    }
+
+    private static func extractInteractorType(from args: LabeledExprListSyntax) -> String? {
+        guard let firstArg = args.first,
+              firstArg.label == nil,
+              let memberAccess = firstArg.expression.as(MemberAccessExprSyntax.self),
+              memberAccess.declName.baseName.text == "self"
+        else {
+            return nil
+        }
+
+        if let base = memberAccess.base?.as(DeclReferenceExprSyntax.self) {
+            return base.baseName.text
+        }
+
+        return nil
+    }
+
     public static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
@@ -66,6 +94,13 @@ public struct StoreMacro: ExtensionMacro {
                 ) {
                     store.dispatch(actionPath, repeat each args)
                 }
+
+                func dispatch<each Argument>(
+                    _ actionPath: KeyPath<\(raw: storeName).I, Action<\(raw: storeName), repeat each Argument>>,
+                    _ args: repeat each Argument
+                ) {
+                    store.interactor[keyPath: actionPath].dispatch(store, repeat each args)
+                }
             
                 public func dispatch<each Argument>(
                     _ asyncAction: AsyncAction<\(raw: storeName), repeat each Argument>,
@@ -79,6 +114,13 @@ public struct StoreMacro: ExtensionMacro {
                     _ args: repeat each Argument
                 ) async {
                     await store.dispatch(asyncActionPath, repeat each args)
+                }
+
+                func dispatch<each Argument>(
+                    _ asyncActionPath: KeyPath<\(raw: storeName).I, AsyncAction<\(raw: storeName), repeat each Argument>>,
+                    _ args: repeat each Argument
+                ) async {
+                    await store.interactor[keyPath: asyncActionPath].dispatch(store, repeat each args)
                 }
             """)
         }

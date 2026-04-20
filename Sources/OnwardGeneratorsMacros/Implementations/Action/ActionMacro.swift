@@ -1,10 +1,3 @@
-//
-//  ActionMacro.swift
-//  onward
-//
-//  Created by Pedro Sousa on 23/12/25.
-//
-
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros

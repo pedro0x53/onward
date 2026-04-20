@@ -1,10 +1,17 @@
-//
-//  ActionBuilder.swift
-//  onward
-//
-//  Created by Pedro Sousa on 04/07/25.
-//
-
+/// A result builder that assembles an ordered list of ``ActionComponent``
+/// values for use inside an ``Action``.
+///
+/// `ActionBuilder` accepts ``Reducer``, ``Middleware``, ``ReducerQueue``,
+/// and any custom ``ActionComponentSchema`` conformance. It supports the
+/// full set of result-builder control flow: `if`, `if/else`, `for…in`,
+/// and `#available` checks.
+///
+/// ```swift
+/// Action {
+///     Reducer(get: \.count, set: \.count) { $0 + 1 }
+///     Middleware { proxy in print("Count is now \(proxy.count)") }
+/// }
+/// ```
 @resultBuilder
 public enum ActionBuilder<S: Store> {
     public static func buildBlock(_ reducers: [ActionComponent<S>]...) -> [ActionComponent<S>] {
@@ -35,7 +42,7 @@ public enum ActionBuilder<S: Store> {
         return expression
     }
     
-    public static func buildExpression<Component: ActionComponentScheme>(_ component: Component) -> [ActionComponent<S>] where Component.S == S {
+    public static func buildExpression<Component: ActionComponentSchema>(_ component: Component) -> [ActionComponent<S>] where Component.S == S {
         [ActionComponent(component)]
     }
 

@@ -1,10 +1,3 @@
-//
-//  LabeledExprListSyntax.swift
-//  onward
-//
-//  Created by Pedro Sousa on 24/12/25.
-//
-
 import SwiftSyntax
 
 extension LabeledExprListSyntax {

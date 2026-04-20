@@ -1,10 +1,17 @@
-//
-//  AsyncReducerBuilder.swift
-//  onward
-//
-//  Created by Pedro Sousa on 29/06/25.
-//
-
+/// A result builder that assembles an ordered list of ``AsyncReducer``
+/// values for use inside an ``AsyncReducerQueue`` or an ``AsyncAction``.
+///
+/// `AsyncReducerBuilder` accepts individual ``AsyncReducer`` instances,
+/// ``AsyncReducerQueue`` values (which are flattened automatically), and
+/// arrays of async reducers. It supports the full set of result-builder
+/// control flow.
+///
+/// ```swift
+/// AsyncReducerQueue {
+///     AsyncReducer(set: \.isLoading) { true }
+///     AsyncReducer(get: \.query, set: \.results) { q in await search(q) }
+/// }
+/// ```
 @resultBuilder
 public enum AsyncReducerBuilder<S: Store> {
     public static func buildBlock(_ reducers: [AsyncReducer<S>]...) -> [AsyncReducer<S>] {

@@ -1,10 +1,3 @@
-//
-//  ReducerMacro.swift
-//  onward
-//
-//  Created by Pedro Sousa on 13/12/25.
-//
-
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros

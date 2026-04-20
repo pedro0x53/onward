@@ -1,11 +1,16 @@
-//
-//  ReducerBuilder.swift
-//  onward
-//
-//  Created by Pedro Sousa on 04/07/25.
-//
-
-
+/// A result builder that assembles an ordered list of ``Reducer`` values
+/// for use inside a ``ReducerQueue`` or an ``Action``.
+///
+/// `ReducerBuilder` accepts individual ``Reducer`` instances,
+/// ``ReducerQueue`` values (which are flattened automatically), and arrays
+/// of reducers. It supports the full set of result-builder control flow.
+///
+/// ```swift
+/// ReducerQueue {
+///     Reducer(set: \.isLoading) { true }
+///     Reducer(get: \.count, set: \.count) { $0 + 1 }
+/// }
+/// ```
 @resultBuilder
 public enum ReducerBuilder<S: Store> {
     public static func buildBlock(_ reducers: [Reducer<S>]...) -> [Reducer<S>] {

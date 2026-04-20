@@ -1,10 +1,3 @@
-//
-//  OnwardGeneratorsPlugin.swift
-//  onward
-//
-//  Created by Pedro Sousa on 11/11/25.
-//
-
 import SwiftCompilerPlugin
 import SwiftSyntaxMacros
 
@@ -15,6 +8,8 @@ struct OnwardGeneratorsPlugin: CompilerPlugin {
         ReducerMacro.self,
         MiddlewareMacro.self,
         ActionMacro.self,
-        AsyncActionMacro.self
+        AsyncActionMacro.self,
+        InwardMacro.self,
+        InteractorMacro.self
     ]
 }

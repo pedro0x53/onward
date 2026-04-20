@@ -1,10 +1,18 @@
-//
-//  AsyncActionBuilder.swift
-//  onward
-//
-//  Created by Pedro Sousa on 02/07/25.
-//
-
+/// A result builder that assembles an ordered list of
+/// ``AsyncActionComponent`` values for use inside an ``AsyncAction``.
+///
+/// `AsyncActionBuilder` accepts ``AsyncReducer``, ``AsyncMiddleware``,
+/// ``AsyncReducerQueue``, and any custom ``AsyncActionComponentSchema``
+/// conformance. It supports the full set of result-builder control flow:
+/// `if`, `if/else`, `for…in`, and `#available` checks.
+///
+/// ```swift
+/// AsyncAction {
+///     AsyncReducer(set: \.isLoading) { true }
+///     AsyncMiddleware { proxy in await api.refresh() }
+///     AsyncReducer(set: \.isLoading) { false }
+/// }
+/// ```
 @resultBuilder
 public enum AsyncActionBuilder<S: Store> {
     public static func buildBlock(_ reducers: [AsyncActionComponent<S>]...) -> [AsyncActionComponent<S>] {
@@ -35,7 +43,7 @@ public enum AsyncActionBuilder<S: Store> {
         return expression
     }
     
-    public static func buildExpression<Component: AsyncActionComponentScheme>(_ component: Component) -> [AsyncActionComponent<S>] where Component.S == S {
+    public static func buildExpression<Component: AsyncActionComponentSchema>(_ component: Component) -> [AsyncActionComponent<S>] where Component.S == S {
         [AsyncActionComponent(component)]
     }
 
