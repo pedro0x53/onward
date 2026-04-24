@@ -83,7 +83,7 @@ struct MiddlewareMacro: PeerMacro {
 
         let lowercasedMetatype = metatype.prefix(1).lowercased() + metatype.dropFirst()
         let capitalizedFuncName = funcName.prefix(1).uppercased() + funcName.dropFirst()
-        let propertyName = "\(funcName)Middleware"
+        let propertyName = "\(lowercasedMetatype)\(capitalizedFuncName)Middleware"
 
         let selfReference = isStatic ? "Self" : "self"
         let staticKeyword = isStatic ? "static " : ""

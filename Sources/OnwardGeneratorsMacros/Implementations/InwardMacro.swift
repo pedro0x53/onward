@@ -66,15 +66,13 @@ public struct InwardMacro: AccessorMacro, PeerMacro {
             return []
         }
 
-        let varName = pattern.identifier.text
-        let keyName = Self.keyName(for: varName)
+        let keyName = keyName(for: pattern.identifier.text)
         let typeText = typeAnnotation.type.trimmedDescription
-        let defaultExpr = initializer.value.trimmedDescription
 
         let keyStruct = DeclSyntax(
-            stringLiteral: """
-            private struct \(keyName): InwardKey {
-                static var defaultValue: \(typeText) { \(defaultExpr) }
+            """
+            private struct \(raw: keyName): InwardKey {
+                static var wrappedValue: \(raw: typeText) \(raw: initializer)
             }
             """
         )

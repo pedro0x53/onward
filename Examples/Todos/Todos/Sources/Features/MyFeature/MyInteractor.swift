@@ -59,7 +59,7 @@ final class MyInteractor {
     }
 
     // MARK: Using the Onward Macros
-    @Action(middlewares:  \Self.loadRemoteMiddleware,
+    @Action(middlewares:  \Self.toDoStoreLoadRemoteMiddleware,
             lateReducers: \Self.toDoStoreSetLoadedAlertContentReducer,
                           \Self.toDoStoreDiplayAlertReducer)
     var loadRemoteAction: AsyncAction<ToDoStore>

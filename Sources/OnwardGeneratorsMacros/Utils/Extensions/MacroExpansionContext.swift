@@ -5,7 +5,7 @@ extension MacroExpansionContext {
     var enclosingTypes: [DeclGroupSyntax] {
         self.lexicalContext.compactMap { syntax in
             guard let declGroup = syntax.asProtocol(DeclGroupSyntax.self),
-                  let namedDecl = declGroup.asProtocol(NamedDeclSyntax.self)
+                  declGroup.asProtocol(NamedDeclSyntax.self) != nil
             else { return nil }
 
             return declGroup

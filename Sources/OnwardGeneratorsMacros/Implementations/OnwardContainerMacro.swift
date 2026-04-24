@@ -2,23 +2,30 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import SwiftDiagnostics
+import Foundation
 
-public struct InteractorMacro: MemberMacro, ExtensionMacro {
-    public static func expansion(
+struct OnwardContainerMacro: MemberMacro, ExtensionMacro {
+    static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
+        guard let namedDecl = declaration.asProtocol(NamedDeclSyntax.self)
+        else {
+            context.diagnose(Diagnostic(node: Syntax(node), message: OnwardMacroError.notNamedDecl))
+            return []
+        }
+
+        let name = namedDecl.name.text
+
         return [
-            DeclSyntax(stringLiteral:
-            """
-                init() {}
-            """)
+            DeclSyntax("public static let container: \(raw: name) = .init()"),
+            DeclSyntax("public init() {}")
         ]
     }
 
-    public static func expansion(
+    static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
         providingExtensionsOf type: some TypeSyntaxProtocol,
@@ -31,17 +38,10 @@ public struct InteractorMacro: MemberMacro, ExtensionMacro {
             return []
         }
 
-        let interactorName = namedDecl.name.text
+        let name = namedDecl.name.text
 
-        let extensionDecl = try ExtensionDeclSyntax("extension \(raw: interactorName): Interactor") {
-            DeclSyntax(
-                """
-                public static func build() -> Self {
-                    return Self()
-                } 
-                """
-            )
-        }
+        guard let extensionDecl = ExtensionDeclSyntax(DeclSyntax(stringLiteral: "extension \(name) : OnwardContainerSchema {}"))
+        else { return [] }
 
         return [extensionDecl]
     }

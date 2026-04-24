@@ -38,7 +38,7 @@ struct ActionFactory {
         }
 
         guard let parent = context.ownerTypeName,
-              let owner = keyPaths.compactMap { $0.rootName }.first,
+              let owner = keyPaths.compactMap({ $0.rootName }).first,
               owner == parent || owner == "Self"
         else {
             context.diagnose(Diagnostic(node: Syntax(node), message: OnwardMacroError.invalidAction))
@@ -57,7 +57,7 @@ struct ActionFactory {
     }
 
     private static func extractMetatype(from variableDecl: VariableDeclSyntax) -> String? {
-        guard let type = variableDecl.bindings.compactMap { $0.typeAnnotation?.type.description }.first
+        guard let type = variableDecl.bindings.compactMap({ $0.typeAnnotation?.type.description }).first
         else {
             return nil
         }

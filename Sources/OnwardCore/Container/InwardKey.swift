@@ -13,7 +13,7 @@
 ///     @Inward var apiClient: APIClient = DefaultAPIClient()
 /// }
 /// ```
-public protocol InwardKey {
-    associatedtype Value
-    static var defaultValue: Value { get }
+public protocol InwardKey: Sendable {
+    associatedtype Value: Sendable
+    static var wrappedValue: Value { get set }
 }
