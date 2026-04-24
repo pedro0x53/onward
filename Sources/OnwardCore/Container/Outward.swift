@@ -23,7 +23,7 @@ public struct Outward<Container, Value> where Container: OnwardContainerSchema {
         _ keyPath: KeyPath<Container, Value>
     ) {
         self.keyPath = keyPath
-        self.container = container.init()c
+        self.container = container.init()
     }
 
     public var wrappedValue: Value {
