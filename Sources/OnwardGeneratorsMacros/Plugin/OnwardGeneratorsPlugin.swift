@@ -9,8 +9,6 @@ struct OnwardGeneratorsPlugin: CompilerPlugin {
         MiddlewareMacro.self,
         ActionMacro.self,
         AsyncActionMacro.self,
-        InwardMacro.self,
-        InteractorMacro.self,
-        OnwardContainerMacro.self
+        InteractorMacro.self
     ]
 }

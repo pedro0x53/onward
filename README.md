@@ -17,7 +17,7 @@ Onward is a composable, action-based state management library for Swift, inspire
 Add Onward to your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/pedro0x53/onward.git", from: "0.1.0")
+.package(url: "https://github.com/pedro0x53/onward.git", from: "0.4.0")
 ```
 
 Then add `Onward` as a dependency for your target:
@@ -114,10 +114,10 @@ final class ToDoInteractor {
 }
 ```
 
-Override for tests by writing to `OnwardContainer.shared`:
+Override for tests using the `charge` static method:
 
 ```swift
-OnwardContainer.shared.apiClient = MockAPIClient()
+OnwardContainer.charge(\.apiClient, MockAPIClient())
 ```
 
 ### 4. Dispatch Actions from the UI
@@ -162,7 +162,7 @@ View  ──dispatch──▶  Store  ──interactor──▶  Interactor
 - **Interactor** owns all business logic. It never holds state; it only reads via `Proxy` and writes via dispatch.
 - **Middleware** runs side effects before reducers apply. It receives an immutable `Proxy` snapshot.
 - **Reducer** is a pure function that derives a new value from the current one.
-- **OnwardContainer** is the dependency graph — declared with `@Inward`, consumed with `@Outward`.
+- **OnwardContainer** is the dependency graph — declare entries with `@Inward` in a container extension, resolve them with `@Outward`, and override for tests with `OnwardContainer.charge(\.key, mock)`.
 
 ## Example
 
