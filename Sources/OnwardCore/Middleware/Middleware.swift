@@ -41,8 +41,8 @@ public struct Middleware<S: Store> {
     }
 }
 
-extension Middleware: ActionComponentSchema {
-    /// Bridges the ``ActionComponentSchema`` conformance by extracting the
+extension Middleware: ActionComponentSchema, AsyncActionComponentSchema {
+    /// Bridges the ``ActionComponentSchema`` and ``AsyncActionComponentSchema`` conformance by extracting the
     /// store's proxy and forwarding it to ``perform(_:)``.
     public func run(_ store: S) {
         self.perform(store.proxy)

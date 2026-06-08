@@ -87,8 +87,8 @@ public struct Reducer<S: Store> {
     }
 }
 
-extension Reducer: ActionComponentSchema {
-    /// Bridges the ``ActionComponentSchema`` conformance by forwarding to
+extension Reducer: ActionComponentSchema, AsyncActionComponentSchema {
+    /// Bridges the ``ActionComponentSchema`` and ``AsyncActionComponentSchema`` conformance by forwarding to
     /// ``reduce(_:)``.
     public func run(_ store: S) {
         self.reduce(store)
