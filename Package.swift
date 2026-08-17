@@ -13,8 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
-//        .package(url: "https://github.com/pedro0x53/volt.git", from: "0.1.0")
-        .package(url: "https://github.com/pedro0x53/volt.git", branch: "main")
+        .package(url: "https://github.com/pedro0x53/volt.git", from: "0.1.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
