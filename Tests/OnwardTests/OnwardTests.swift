@@ -1,11 +1,15 @@
 import Testing
 @testable import Onward
 
+@Interactor
+final class ToDoInteractor {}
+
+@Store(ToDoInteractor.self)
 class ToDo {
     var title: String
     var description: String
     var isCompleted: Bool
-    
+
     init(title: String, description: String, isCompleted: Bool = false) {
         self.title = title
         self.description = description
@@ -39,7 +43,7 @@ struct OnwardTests {
             }
         }
 
-        await setTitleAction.dispatch(todo, args: expectedTitle)
+        await setTitleAction.dispatch(todo, expectedTitle)
 
         #expect(todo.title == expectedTitle)
     }
@@ -98,57 +102,51 @@ struct OnwardTests {
         let expectedTitle = baseTitle + expectedContext
 
         let action = Action<ToDo, String> { title in
-            Middleware { store in
-                return expectedContext
-            } interceptBefore: { context in
-                Reducer(setter: \.title) {
-                    return title + context
-                }
+            // Middleware only sees a read-only proxy, so it mutates state by
+            // dispatching a mutator action rather than writing directly.
+            Middleware { proxy in
+                proxy.dispatch(\.titleMutator, title + expectedContext)
             }
 
-            Middleware { store in
-                store.isCompleted = false
-            } interceptAfter: {
-                Reducer(setter: \.isCompleted) {
-                    return true
-                }
+            Middleware { proxy in
+                proxy.dispatch(\.isCompletedMutator, false)
+            }
+
+            Reducer(setter: \.isCompleted) {
+                return true
             }
         }
 
-        action.dispatch(todo, args: baseTitle)
+        action.dispatch(todo, baseTitle)
 
         #expect(todo.title == expectedTitle)
-        #expect(!todo.isCompleted)
+        #expect(todo.isCompleted)
     }
 
     @Test func dispatchAsyncActionWithMiddleware() async throws {
         let todo = ToDo(title: "Test", description: "Description")
 
         let baseTitle = "Async Title"
-        let expectedContext = " - Middleware Context"
+        let expectedContext = " - Async Middleware Context"
         let expectedTitle = baseTitle + expectedContext
 
         let asyncAction = AsyncAction<ToDo, String> { title in
-            AsyncMiddleware { store in
-                return expectedContext
-            } interceptBefore: { context in
-                AsyncReducer(setter: \.title) {
-                    return title + context
-                }
+            AsyncMiddleware { proxy in
+                proxy.dispatch(\.titleMutator, title + expectedContext)
             }
 
-            AsyncMiddleware { store in
-                store.isCompleted = false
-            } interceptAfter: {
-                AsyncReducer(setter: \.isCompleted) {
-                    return true
-                }
+            AsyncMiddleware { proxy in
+                proxy.dispatch(\.isCompletedMutator, false)
+            }
+
+            AsyncReducer(setter: \.isCompleted) {
+                return true
             }
         }
 
-        await asyncAction.dispatch(todo, args: baseTitle)
+        await asyncAction.dispatch(todo, baseTitle)
 
         #expect(todo.title == expectedTitle)
-        #expect(!todo.isCompleted)
+        #expect(todo.isCompleted)
     }
 }

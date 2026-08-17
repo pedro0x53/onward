@@ -13,7 +13,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
-        .package(url: "https://github.com/pedro0x53/volt.git", from: "0.1.0")
+//        .package(url: "https://github.com/pedro0x53/volt.git", from: "0.1.0")
+        .package(url: "https://github.com/pedro0x53/volt.git", branch: "main")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,7 +25,7 @@ let package = Package(
                 .product(name: "Volt", package: "volt")
             ]
         ),
-        .testTarget(name: "OnwardTests", dependencies: ["OnwardCore"]),
+        .testTarget(name: "OnwardTests", dependencies: ["OnwardCore", "Onward"]),
 
         // Macro implementation that performs the source transformation of a macro.
         .macro(
@@ -37,15 +38,6 @@ let package = Package(
 
         // Library that exposes a macro as part of its API, which is used in client programs.
         .target(name: "OnwardGenerators", dependencies: ["OnwardCore", "OnwardGeneratorsMacros"]),
-
-        // A test target used to develop the macro implementation.
-        .testTarget(
-            name: "OnwardGeneratorsTests",
-            dependencies: [
-                "OnwardGeneratorsMacros",
-                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
-            ]
-        ),
 
         .target(
             name: "Onward",
