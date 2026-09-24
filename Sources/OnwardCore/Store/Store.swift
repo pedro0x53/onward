@@ -22,7 +22,7 @@
 /// store.dispatch(\.toggleAction)
 /// await store.dispatch(interactor.fetchAction)
 /// ```
-public protocol Store: AnyObject {
+@MainActor public protocol Store: AnyObject {
     /// An immutable snapshot of the store's state, used by ``Middleware`` and
     /// ``AsyncMiddleware`` to read values without risking mutation during
     /// asynchronous work.
@@ -38,6 +38,7 @@ public protocol Store: AnyObject {
     var interactor: Self.I { get }
 }
 
+@MainActor
 public extension Store {
     /// Dispatches a synchronous action against this store.
     ///

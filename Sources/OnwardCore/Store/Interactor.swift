@@ -37,7 +37,7 @@
 /// ```swift
 /// store.dispatch(\.toggleCompleted, todo)
 /// ```
-public protocol Interactor: AnyObject {
+@MainActor public protocol Interactor: AnyObject {
     /// Creates and returns a new instance of the conforming interactor.
     ///
     /// The ``Store`` calls this factory once when it is first accessed,

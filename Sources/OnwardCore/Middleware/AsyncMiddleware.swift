@@ -26,14 +26,14 @@
 /// `AsyncMiddleware` conforms to ``AsyncActionComponentSchema``, so it can
 /// be placed directly inside an ``AsyncActionBuilder`` block alongside
 /// async reducers.
-public struct AsyncMiddleware<S: Store> {
-    private let _perform: (S.Proxy) async -> Void
+@MainActor public struct AsyncMiddleware<S: Store> {
+    private let _perform: @MainActor (S.Proxy) async -> Void
 
     /// Creates an async middleware with the given closure.
     ///
     /// - Parameter perform: An `async` closure that receives the store's
     ///   proxy and performs side-effect work.
-    public init(_ perform: @escaping (S.Proxy) async -> Void) {
+    public init(_ perform: @MainActor @escaping (S.Proxy) async -> Void) {
         self._perform = perform
     }
 

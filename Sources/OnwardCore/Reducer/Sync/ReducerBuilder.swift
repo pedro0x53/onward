@@ -12,7 +12,7 @@
 /// }
 /// ```
 @resultBuilder
-public enum ReducerBuilder<S: Store> {
+@MainActor public enum ReducerBuilder<S: Store> {
     public static func buildBlock(_ reducers: [Reducer<S>]...) -> [Reducer<S>] {
         reducers.flatMap { $0 }
     }

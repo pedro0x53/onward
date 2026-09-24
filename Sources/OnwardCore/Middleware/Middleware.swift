@@ -24,14 +24,14 @@
 ///
 /// `Middleware` conforms to ``ActionComponentSchema``, so it can be placed
 /// directly inside an ``ActionBuilder`` block alongside reducers.
-public struct Middleware<S: Store> {
-    private let _perform: (S.Proxy) -> Void
+@MainActor public struct Middleware<S: Store> {
+    private let _perform: @MainActor (S.Proxy) -> Void
 
     /// Creates a middleware with the given closure.
     ///
     /// - Parameter perform: A closure that receives the store's proxy and
     ///   performs synchronous side-effect work.
-    public init(_ perform: @escaping (S.Proxy) -> Void) {
+    public init(_ perform: @MainActor @escaping (S.Proxy) -> Void) {
         self._perform = perform
     }
 

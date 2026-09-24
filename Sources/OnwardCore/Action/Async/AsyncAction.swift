@@ -24,15 +24,15 @@
 /// @Action(reducers: \Self.dismissReducer, middlewares: \Self.apiMiddleware)
 /// var refreshAction: AsyncAction<ToDoStore>
 /// ```
-public struct AsyncAction<S: Store, each Argument>: Sendable {
-    private let components: @Sendable (repeat each Argument) -> [AsyncActionComponent<S>]
+@MainActor public struct AsyncAction<S: Store, each Argument> {
+    private let components: @MainActor (repeat each Argument) -> [AsyncActionComponent<S>]
 
     /// Creates an async action whose components are produced by an
     /// ``AsyncActionBuilder`` closure.
     ///
     /// - Parameter components: A result-builder closure that returns the
     ///   ordered list of ``AsyncActionComponent`` values to run on dispatch.
-    public init(@AsyncActionBuilder<S> _ components: @Sendable @escaping (repeat each Argument) -> [AsyncActionComponent<S>]) {
+    public init(@AsyncActionBuilder<S> _ components: @MainActor @escaping (repeat each Argument) -> [AsyncActionComponent<S>]) {
         self.components = components
     }
 

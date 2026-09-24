@@ -14,7 +14,7 @@
 /// }
 /// ```
 @resultBuilder
-public enum AsyncActionBuilder<S: Store> {
+@MainActor public enum AsyncActionBuilder<S: Store> {
     public static func buildBlock(_ reducers: [AsyncActionComponent<S>]...) -> [AsyncActionComponent<S>] {
         reducers.flatMap { $0 }
     }

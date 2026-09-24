@@ -35,6 +35,15 @@ let package = Package(
            ]
         ),
 
+        .testTarget(
+            name: "OnwardGeneratorsMacrosTests",
+            dependencies: [
+                "OnwardGeneratorsMacros",
+                .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax")
+            ]
+        ),
+
         // Library that exposes a macro as part of its API, which is used in client programs.
         .target(name: "OnwardGenerators", dependencies: ["OnwardCore", "OnwardGeneratorsMacros"]),
 

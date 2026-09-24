@@ -25,8 +25,8 @@
 ///
 /// `AsyncReducer` conforms to ``AsyncActionComponentSchema``, so it can be
 /// placed directly inside an ``AsyncActionBuilder`` block.
-public struct AsyncReducer<S: Store> {
-    private var _reduce: (S) async -> Void
+@MainActor public struct AsyncReducer<S: Store> {
+    private var _reduce: @MainActor (S) async -> Void
 
     /// Creates a read-only async reducer that extracts values from the store
     /// and passes them to an `async` closure.
@@ -35,7 +35,7 @@ public struct AsyncReducer<S: Store> {
     ///   - keyPaths: One or more key paths to read from the store.
     ///   - work: An `async` closure that receives the extracted values.
     public init<each Input>(getter keyPaths: repeat KeyPath<S, each Input>,
-                            do work: @escaping (repeat each Input) async -> Void) {
+                            do work: @MainActor @escaping (repeat each Input) async -> Void) {
         self._reduce = { store in
             await work(repeat store[keyPath: each keyPaths])
         }
@@ -48,7 +48,7 @@ public struct AsyncReducer<S: Store> {
     ///   - keyPaths: One or more writable key paths to set on the store.
     ///   - work: An `async` closure that returns the new values.
     public init<each Output>(setter keyPaths: repeat ReferenceWritableKeyPath<S, each Output>,
-                             do work: @escaping () async -> (repeat each Output)) {
+                             do work: @MainActor @escaping () async -> (repeat each Output)) {
         self._reduce = { store in
             repeat store[keyPath: each keyPaths] = each await work()
         }
@@ -64,7 +64,7 @@ public struct AsyncReducer<S: Store> {
     ///     output values.
     public init<each Input, each Output>(get getKeyPaths: repeat KeyPath<S, each Input>,
                                          set setKeyPaths: repeat ReferenceWritableKeyPath<S, each Output>,
-                                         do work: @escaping (repeat each Input) async -> (repeat each Output)) {
+                                         do work: @MainActor @escaping (repeat each Input) async -> (repeat each Output)) {
         self._reduce = { store in
             repeat store[keyPath: each setKeyPaths] = each await work(repeat store[keyPath: each getKeyPaths])
         }

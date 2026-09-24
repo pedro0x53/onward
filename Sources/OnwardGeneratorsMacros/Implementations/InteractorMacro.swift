@@ -10,11 +10,13 @@ public struct InteractorMacro: MemberMacro, ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        guard declaration.is(ClassDeclSyntax.self)
+        guard let classDecl = declaration.as(ClassDeclSyntax.self)
         else {
             context.diagnose(Diagnostic(node: Syntax(node), message: OnwardMacroError.notAClass))
             return []
         }
+
+        MainActorCheck.diagnoseIfMissing(on: classDecl, node: node, in: context)
 
         return [
             DeclSyntax(stringLiteral:

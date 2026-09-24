@@ -5,6 +5,7 @@ enum OnwardMacroError: String, DiagnosticMessage {
     case notAFunction
     case notAVariable
     case notNamedDecl
+    case missingMainActor
 
     case missingStore
     case missingActionComponents
@@ -26,6 +27,10 @@ enum OnwardMacroError: String, DiagnosticMessage {
     var severity: DiagnosticSeverity { .error }
 
     var message: String {
+        message(className: nil)
+    }
+
+    func message(className: String?) -> String {
         switch self {
         case .notAClass:
             return "@Store can only be applied to classes"
@@ -35,6 +40,8 @@ enum OnwardMacroError: String, DiagnosticMessage {
             return "@Action can only be applied to variables"
         case .notNamedDecl:
             return "Macro can only be applied to top-level named declarations"
+        case .missingMainActor:
+            return "@Store/@Interactor requires '\(className ?? "the class")' to be @MainActor. Add '@MainActor' to the class declaration."
         case .missingStore:
             return "Macro requires T.Type conform to Store protocol"
         case .missingActionComponents:
@@ -59,4 +66,14 @@ enum OnwardMacroError: String, DiagnosticMessage {
             return "@Inward requires an initializer expression to use as the InwardKey defaultValue, e.g. `@Inward var apiClient: APIClient = DefaultAPIClient()`"
         }
     }
+}
+
+/// Wraps an ``OnwardMacroError`` whose message names the offending class.
+struct OnwardClassDiagnostic: DiagnosticMessage {
+    let error: OnwardMacroError
+    let className: String
+
+    var message: String { error.message(className: className) }
+    var diagnosticID: MessageID { error.diagnosticID }
+    var severity: DiagnosticSeverity { error.severity }
 }

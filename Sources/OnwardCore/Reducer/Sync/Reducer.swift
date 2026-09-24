@@ -29,8 +29,8 @@
 ///
 /// `Reducer` conforms to ``ActionComponentSchema``, so it can be placed
 /// directly inside an ``ActionBuilder`` block.
-public struct Reducer<S: Store> {
-    private var _reduce: (S) -> Void
+@MainActor public struct Reducer<S: Store> {
+    private var _reduce: @MainActor (S) -> Void
 
     /// Creates a read-only reducer that extracts values from the store and
     /// passes them to `work`.
@@ -42,7 +42,7 @@ public struct Reducer<S: Store> {
     ///   - keyPaths: One or more key paths to read from the store.
     ///   - work: A closure that receives the extracted values.
     public init<each Input>(getter keyPaths: repeat KeyPath<S, each Input>,
-                            do work: @escaping (repeat each Input) -> Void) {
+                            do work: @MainActor @escaping (repeat each Input) -> Void) {
         self._reduce = { store in
             work(repeat store[keyPath: each keyPaths])
         }
@@ -57,7 +57,7 @@ public struct Reducer<S: Store> {
     ///   - keyPaths: One or more writable key paths to set on the store.
     ///   - work: A closure that returns the new values.
     public init<each Output>(setter keyPaths: repeat ReferenceWritableKeyPath<S, each Output>,
-                             do work: @escaping () -> (repeat each Output)) {
+                             do work: @MainActor @escaping () -> (repeat each Output)) {
         self._reduce = { store in
             repeat store[keyPath: each keyPaths] = each work()
         }
@@ -75,7 +75,7 @@ public struct Reducer<S: Store> {
     ///   - work: A closure that transforms the input values into output values.
     public init<each Input, each Output>(get getKeyPaths: repeat KeyPath<S, each Input>,
                                          set setKeyPaths: repeat ReferenceWritableKeyPath<S, each Output>,
-                                         do work: @escaping (repeat each Input) -> (repeat each Output)) {
+                                         do work: @MainActor @escaping (repeat each Input) -> (repeat each Output)) {
         self._reduce = { store in
             repeat store[keyPath: each setKeyPaths] = each work(repeat store[keyPath: each getKeyPaths])
         }

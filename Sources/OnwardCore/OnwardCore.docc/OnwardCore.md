@@ -24,6 +24,10 @@ import Onward
 
 A ``Store`` is a reference-type state container whose properties drive the UI. Pair it with an ``Interactor`` that owns all business logic. The ``Store`` protocol's `dispatch` family of methods routes actions from the view into the right interactor.
 
+### Main-actor isolation
+
+The entire dispatch pipeline — ``Store``, ``Interactor``, ``Action``, ``AsyncAction``, ``Reducer``, ``AsyncReducer``, their queues and builders, ``Middleware`` and ``AsyncMiddleware`` — is `@MainActor`. Stored closures (reducer `work`, middleware `perform`, action components) are `@MainActor` and never `@Sendable`, so a `@MainActor @Observable` store does not need to be `Sendable`. `Sendable` was removed from ``Action`` and ``AsyncAction``. Synchronous dispatch introduces no suspension point; asynchronous dispatch preserves component order and re-entrant `proxy.dispatch` visibility. A non-`@MainActor` caller of an async `dispatch` must pass `Sendable` arguments at its own call site.
+
 ### Actions
 
 An ``Action`` (sync) or ``AsyncAction`` (async) bundles one or more reducers and middlewares into a single dispatchable value. Components run in declaration order:
