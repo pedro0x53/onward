@@ -5,7 +5,7 @@
 /// which is what allows them to be mixed freely inside an
 /// ``AsyncActionBuilder`` closure. You can also create your own conforming
 /// types for custom async logic.
-public protocol AsyncActionComponentSchema {
+@MainActor public protocol AsyncActionComponentSchema {
     /// The store type this component operates on.
     associatedtype S: Store
 
@@ -20,8 +20,8 @@ public protocol AsyncActionComponentSchema {
 /// ``AsyncActionBuilder`` automatically wraps concrete conformances
 /// (``AsyncReducer``, ``AsyncMiddleware``, ``AsyncReducerQueue``) into
 /// this type so they can coexist in a single array.
-public struct AsyncActionComponent<S: Store>: AsyncActionComponentSchema {
-    private let _run: (S) async -> Void
+@MainActor public struct AsyncActionComponent<S: Store>: AsyncActionComponentSchema {
+    private let _run: @MainActor (S) async -> Void
 
     /// Wraps a concrete ``AsyncActionComponentSchema`` conformance into this
     /// type-erased container.

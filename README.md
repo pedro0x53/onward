@@ -37,10 +37,13 @@ Then add `Onward` as a dependency for your target:
 
 Use `@Store(Interactor.self)` paired with `@Observable`. The macro generates a `Proxy` snapshot type and a mutator action for each stored `var`.
 
+Store and interactor classes **must be `@MainActor`**. The whole dispatch pipeline (`Action`, `AsyncAction`, reducers, middleware, `Store`, `Interactor`) is isolated to the main actor, so a non-`Sendable` `@Observable` store can dispatch sync and async actions with no concurrency diagnostics. `@Store` and `@Interactor` emit a `missingMainActor` error on a class that lacks `@MainActor`.
+
 ```swift
 import Observation
 import Onward
 
+@MainActor
 @Observable
 @Store(ToDoInteractor.self)
 final class ToDoStore {
@@ -56,6 +59,7 @@ The `@Interactor` macro generates the required `build()` factory and `init()`. D
 ```swift
 import Onward
 
+@MainActor
 @Interactor
 final class ToDoInteractor {
 
@@ -96,6 +100,8 @@ final class ToDoInteractor {
 }
 ```
 
+> **Note:** `Action` and `AsyncAction` are no longer `Sendable`, and their closures are `@MainActor` rather than `@Sendable`. Calling an async `dispatch` from a non-`@MainActor` context makes the passed arguments cross an isolation boundary, so they must be `Sendable` at that call site. This is a breaking change (major version bump).
+
 ### 3. Register and Resolve Dependencies
 
 Declare dependencies with `@Inward` on an `OnwardContainer` extension. Resolve them anywhere with `@Outward`.
@@ -107,6 +113,7 @@ extension OnwardContainer {
 }
 
 // Resolution inside an Interactor
+@MainActor
 @Interactor
 final class ToDoInteractor {
     @Outward(\.apiClient) var apiClient: APIClient

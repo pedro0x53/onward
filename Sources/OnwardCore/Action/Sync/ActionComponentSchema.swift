@@ -5,7 +5,7 @@
 /// what allows them to be mixed freely inside an ``ActionBuilder`` closure.
 /// You can also create your own conforming types if you need custom
 /// synchronous logic that doesn't fit neatly into a reducer or middleware.
-public protocol ActionComponentSchema {
+@MainActor public protocol ActionComponentSchema {
     /// The store type this component operates on.
     associatedtype S: Store
 
@@ -20,8 +20,8 @@ public protocol ActionComponentSchema {
 /// ``ActionBuilder`` automatically wraps concrete conformances
 /// (``Reducer``, ``Middleware``, ``ReducerQueue``) into this type so they
 /// can coexist in a single array.
-public struct ActionComponent<S: Store>: ActionComponentSchema {
-    private let _run: (S) -> Void
+@MainActor public struct ActionComponent<S: Store>: ActionComponentSchema {
+    private let _run: @MainActor (S) -> Void
 
     /// Wraps a concrete ``ActionComponentSchema`` conformance into this
     /// type-erased container.

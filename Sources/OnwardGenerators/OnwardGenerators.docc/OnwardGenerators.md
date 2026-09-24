@@ -10,8 +10,10 @@ Swift macros that eliminate boilerplate when adopting the Onward framework.
 
 Apply ``Store(_:)`` to a `final class` paired with `@Observable`. The macro generates a `Proxy` nested struct (an immutable state snapshot used by middlewares), a `proxy` computed property, and a mutator ``Action`` for every stored `var`:
 
+The annotated class must be `@MainActor`. The generated `Proxy` is `@MainActor` too. If the class lacks `@MainActor`, `@Store` (and `@Interactor`) emit the error `@Store/@Interactor requires '<ClassName>' to be @MainActor. Add '@MainActor' to the class declaration.` Known limitation: a custom global-actor typealias that resolves to `MainActor` is not detected and is reported as missing.
+
 ```swift
-@Store(TodoInteractor.self) @Observable
+@MainActor @Observable @Store(TodoInteractor.self)
 final class TodoStore {
     var todos: [Todo] = []
     var isLoading: Bool = false
@@ -21,7 +23,7 @@ final class TodoStore {
 
 ### `@Interactor` — Synthesize business-logic ownership
 
-Apply ``Interactor()`` to a `final class` to generate a private `init()` and the required `build()` static factory. Declare actions as computed properties — either inline with result builders or composed with macros:
+Apply ``Interactor()`` to a `@MainActor` `final class` to generate a private `init()` and the required `build()` static factory. Declare actions as computed properties — either inline with result builders or composed with macros:
 
 ```swift
 @Interactor

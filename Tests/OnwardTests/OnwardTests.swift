@@ -1,9 +1,13 @@
+import Observation
 import Testing
 @testable import Onward
 
+@MainActor
 @Interactor
 final class ToDoInteractor {}
 
+@MainActor
+@Observable
 @Store(ToDoInteractor.self)
 class ToDo {
     var title: String
@@ -17,6 +21,7 @@ class ToDo {
     }
 }
 
+@MainActor
 @Suite("Onward")
 struct OnwardTests {
     @Test func dispatchAction() async throws {
@@ -148,5 +153,43 @@ struct OnwardTests {
 
         #expect(todo.title == expectedTitle)
         #expect(todo.isCompleted)
+    }
+
+    @Test func dispatchActionSynchronouslyFromMainActor() {
+        let todo = ToDo(title: "Test", description: "Description")
+
+        let toggleStatusAction = Action<ToDo> {
+            Reducer(get: \.isCompleted, set: \.isCompleted) { status in
+                return !status
+            }
+        }
+
+        // No `await` and no suspension point: the mutation is visible on the next line.
+        toggleStatusAction.dispatch(todo)
+        #expect(todo.isCompleted)
+
+        toggleStatusAction.dispatch(todo)
+        #expect(!todo.isCompleted)
+    }
+
+    @Test func asyncMiddlewareSuspendsBeforeTrailingReducer() async {
+        let todo = ToDo(title: "Test", description: "Description")
+
+        let action = AsyncAction<ToDo> {
+            AsyncMiddleware { proxy in
+                await Task.yield()
+                proxy.dispatch(\.titleMutator, "from middleware")
+            }
+
+            // Runs after the middleware, so it must observe the re-entrant dispatch.
+            AsyncReducer(get: \.title, set: \.description) { title in
+                return title + " (seen by reducer)"
+            }
+        }
+
+        await action.dispatch(todo)
+
+        #expect(todo.title == "from middleware")
+        #expect(todo.description == "from middleware (seen by reducer)")
     }
 }

@@ -27,15 +27,15 @@
 ///
 /// Actions support variadic arguments through parameter packs, so the
 /// builder closure can receive external values at dispatch time.
-public struct Action<S: Store, each Argument>: Sendable {
-    private let components: @Sendable (repeat each Argument) -> [ActionComponent<S>]
+@MainActor public struct Action<S: Store, each Argument> {
+    private let components: @MainActor (repeat each Argument) -> [ActionComponent<S>]
 
     /// Creates an action whose components are produced by an
     /// ``ActionBuilder`` closure.
     ///
     /// - Parameter components: A result-builder closure that returns the
     ///   ordered list of ``ActionComponent`` values to run on dispatch.
-    public init(@ActionBuilder<S> _ components: @Sendable @escaping (repeat each Argument) -> [ActionComponent<S>]) {
+    public init(@ActionBuilder<S> _ components: @MainActor @escaping (repeat each Argument) -> [ActionComponent<S>]) {
         self.components = components
     }
 

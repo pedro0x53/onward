@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import Onward
 
+@MainActor
 @Observable
 @Store(MyInteractor.self)
 final class ToDoStore {
@@ -10,6 +11,7 @@ final class ToDoStore {
     var alert: AlertContent = .init()
 }
 
+@MainActor
 @Observable
 @Store(MyInteractor.self)
 final class ToDo: Identifiable {

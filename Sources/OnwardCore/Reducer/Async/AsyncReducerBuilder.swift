@@ -13,7 +13,7 @@
 /// }
 /// ```
 @resultBuilder
-public enum AsyncReducerBuilder<S: Store> {
+@MainActor public enum AsyncReducerBuilder<S: Store> {
     public static func buildBlock(_ reducers: [AsyncReducer<S>]...) -> [AsyncReducer<S>] {
         reducers.flatMap { $0 }
     }

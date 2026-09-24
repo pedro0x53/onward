@@ -1,6 +1,7 @@
 import Onward
 import Foundation
 
+@MainActor
 @Interactor
 final class MyInteractor {
     @Outward(\.httpClient) var httpClient

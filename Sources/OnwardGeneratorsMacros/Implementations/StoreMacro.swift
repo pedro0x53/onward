@@ -53,6 +53,8 @@ public struct StoreMacro: ExtensionMacro, MemberMacro {
             return []
         }
         
+        MainActorCheck.diagnoseIfMissing(on: classDecl, node: node, in: context)
+
         let storeName = classDecl.name.text
         let storedProperties = getVariables(from: classDecl)
 
@@ -65,7 +67,7 @@ public struct StoreMacro: ExtensionMacro, MemberMacro {
     private static func buildProxyExtension(storeName: String, storedProperties: [VariableDeclSyntax]) throws -> ExtensionDeclSyntax {
         let computedProperties = parseToComputedProperties(storedProperties)
         
-        let proxyStruct = try StructDeclSyntax("struct Proxy") {
+        let proxyStruct = try StructDeclSyntax("@MainActor struct Proxy") {
             DeclSyntax(
             """
                 private let store: \(raw: storeName)

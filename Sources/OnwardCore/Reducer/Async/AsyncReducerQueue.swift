@@ -12,7 +12,7 @@
 /// }
 /// queue.append(anotherReducer)
 /// ```
-public struct AsyncReducerQueue<S: Store> {
+@MainActor public struct AsyncReducerQueue<S: Store> {
     /// The underlying array of async reducers, in execution order.
     private(set) var reducers: [AsyncReducer<S>]
 
